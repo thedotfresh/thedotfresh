@@ -693,9 +693,8 @@
       return;
     }
 
-    // Replace this URL with your actual Google Form action URL
-    const FORM_URL = 'YOUR_GOOGLE_FORM_URL_HERE';
-    const ENTRY_ID = 'YOUR_EMAIL_ENTRY_ID_HERE';
+    const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfQyS2mEQmQUWc54fbKmsPt6OlXZiOpHXPIu2pSuXVzxTFGRg/formResponse';
+    const ENTRY_ID = 'entry.992231254';
     
     // Submit to Google Form
     fetch(`${FORM_URL}?${ENTRY_ID}=${encodeURIComponent(email)}`, {
