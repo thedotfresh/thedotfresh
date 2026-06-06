@@ -521,15 +521,35 @@
     <div class="eyebrow">Coming Soon</div>
     <h1>One press.<br><em>Today's date.</em><br>Done.</h1>
     <p class="hero-sub">DotFresh is a dead-simple fridge-mounted label maker. No app. No WiFi. No setup. Just press the button and get today's date on a label — every time.</p>
-    <form name="waitlist-hero" method="POST" action="https://docs.google.com/forms/d/e/1FAIpQLSfQyS2mEQmQUWc54fbKmsPt6OlXZiOpHXPIu2pSuXVzxTFGRg/formResponse" target="hidden-iframe" class="waitlist" onsubmit="showSuccess('hero-success', this)">
-      <div class="waitlist-label">Join the waitlist</div>
-      <div class="input-row">
-        <input type="email" name="entry.992231254" placeholder="your@email.com" required />
-        <button type="submit" class="btn-join">Notify Me</button>
-      </div>
-      <div class="success-msg" id="hero-success">🎉 You're on the list! We'll be in touch.</div>
-      <div class="waitlist-note">No spam. Just a launch notification.</div>
-    </form>
+   <form
+  name="waitlist"
+  method="POST"
+  data-netlify="true"
+  class="waitlist"
+  onsubmit="showSuccess(event, this)"
+>
+  <input type="hidden" name="form-name" value="waitlist">
+
+  <div class="waitlist-label">Join the waitlist</div>
+
+  <div class="input-row">
+    <input
+      type="email"
+      name="email"
+      placeholder="your@email.com"
+      required
+    />
+    <button type="submit" class="btn-join">Notify Me</button>
+  </div>
+
+  <div class="success-msg">
+    🎉 You're on the list! We'll be in touch.
+  </div>
+
+  <div class="waitlist-note">
+    No spam. Just a launch notification.
+  </div>
+</form>
   </div>
   <div class="hero-image">
     <img class="product-img" src="dotfresh-render.jpg" alt="DotFresh device mounted on a refrigerator" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
@@ -644,14 +664,33 @@
 <section class="cta" id="waitlist-bottom">
   <h2>Be first to <em style="font-style:italic; color:var(--accent);">know.</em></h2>
   <p>DotFresh launches soon. Join the waitlist and we'll let you know the moment it's available.</p>
-  <form name="waitlist-bottom" method="POST" action="https://docs.google.com/forms/d/e/1FAIpQLSfQyS2mEQmQUWc54fbKmsPt6OlXZiOpHXPIu2pSuXVzxTFGRg/formResponse" target="hidden-iframe" class="waitlist" onsubmit="showSuccess('bottom-success', this)">
-    <div class="input-row">
-      <input type="email" name="entry.992231254" placeholder="your@email.com" required />
-      <button type="submit" class="btn-join">Notify Me</button>
-    </div>
-    <div class="success-msg" id="bottom-success">🎉 You're on the list! We'll be in touch.</div>
-    <div class="waitlist-note">No spam. Just a launch notification.</div>
-  </form>
+ <form
+  name="waitlist"
+  method="POST"
+  data-netlify="true"
+  class="waitlist"
+  onsubmit="showSuccess(event, this)"
+>
+  <input type="hidden" name="form-name" value="waitlist">
+
+  <div class="input-row">
+    <input
+      type="email"
+      name="email"
+      placeholder="your@email.com"
+      required
+    />
+    <button type="submit" class="btn-join">Notify Me</button>
+  </div>
+
+  <div class="success-msg">
+    🎉 You're on the list! We'll be in touch.
+  </div>
+
+  <div class="waitlist-note">
+    No spam. Just a launch notification.
+  </div>
+</form>
 </section>
 
 <footer>
@@ -663,34 +702,50 @@
   </div>
 </footer>
 
-<!-- Hidden iframe to capture Google Form response without redirecting -->
-<iframe name="hidden-iframe" style="display:none;"></iframe>
 
 <script>
-  function showSuccess(successId, form) {
-    setTimeout(() => {
-      form.querySelector('.input-row').style.display = 'none';
-      form.querySelector('.waitlist-note').style.display = 'none';
-      document.getElementById(successId).style.display = 'block';
-    }, 500);
-  }
+function showSuccess(event, form) {
+  event.preventDefault();
 
-  const observer = new IntersectionObserver((entries) => {
-    entries.forEach(el => {
-      if (el.isIntersecting) {
-        el.target.style.opacity = '1';
-        el.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, { threshold: 0.1 });
+  const formData = new FormData(form);
 
-  document.querySelectorAll('.feature-card, .step, .label-sample').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-    observer.observe(el);
+  fetch("/", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams(formData).toString()
+  })
+  .then(() => {
+    form.querySelector('.input-row').style.display = 'none';
+    form.querySelector('.waitlist-note').style.display = 'none';
+    form.querySelector('.success-msg').style.display = 'block';
+  })
+  .catch(() => {
+    alert('Something went wrong. Please try again.');
   });
+}
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(el => {
+    if (el.isIntersecting) {
+      el.target.style.opacity = '1';
+      el.target.style.transform = 'translateY(0)';
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.feature-card, .step, .label-sample').forEach(el => {
+  el.style.opacity = '0';
+  el.style.transform = 'translateY(20px)';
+  el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+  observer.observe(el);
+});
 </script>
+
+<form name="waitlist" netlify hidden>
+  <input type="email" name="email">
+</form>
 
 </body>
 </html>
