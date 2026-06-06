@@ -693,37 +693,33 @@
       return;
     }
 
-    // Build the Google Form URL with email pre-filled
     const FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSfQyS2mEQmQUWc54fbKmsPt6OlXZiOpHXPIu2pSuXVzxTFGRg/formResponse';
     const ENTRY_ID = 'entry.992231254';
-    
-    // Open form submission in hidden iframe
-    let iframe = document.getElementById('hidden-iframe');
-    if (!iframe) {
-      iframe = document.createElement('iframe');
-      iframe.id = 'hidden-iframe';
-      iframe.name = 'hidden-iframe';
-      iframe.style.display = 'none';
-      document.body.appendChild(iframe);
-    }
 
-    // Create and submit a hidden form
+    const iframe = document.createElement('iframe');
+    iframe.name = 'submit-frame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+
     const form = document.createElement('form');
     form.method = 'POST';
     form.action = FORM_URL;
-    form.target = 'hidden-iframe';
-    
-    const emailInput = document.createElement('input');
-    emailInput.type = 'hidden';
-    emailInput.name = ENTRY_ID;
-    emailInput.value = email;
-    
-    form.appendChild(emailInput);
+    form.target = 'submit-frame';
+    form.style.display = 'none';
+
+    const emailField = document.createElement('input');
+    emailField.name = ENTRY_ID;
+    emailField.value = email;
+    form.appendChild(emailField);
+
     document.body.appendChild(form);
     form.submit();
-    document.body.removeChild(form);
 
-    // Show success message
+    setTimeout(() => {
+      document.body.removeChild(form);
+      document.body.removeChild(iframe);
+    }, 2000);
+
     input.parentElement.style.display = 'none';
     success.style.display = 'block';
 }
