@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DotFresh — Timezone Setup</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; background: #fafafa; }
+        .card { max-width: 400px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        button { background: #000; color: white; border: none; padding: 12px 24px; font-size: 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #222; }
+        .status { margin-top: 20px; color: #666; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Sync Your DotFresh</h2>
+    <p>Plug your DotFresh into this device using a USB-C cable, then click the button below to automatically sync its internal clock.</p>
+    
+    <button id="sync-btn">Sync Clock</button>
+    <div id="status" class="status">Device status: Disconnected</div>
+</div>
+
+<script>
+document.getElementById('sync-btn').addEventListener('click', async () => {
+  const statusDiv = document.getElementById('status');
+  
+  // Check if the user's browser supports Web Serial API
+  if (!("serial" in navigator)) {
+    alert("Your browser doesn't support direct USB syncing. Please use Google Chrome or Microsoft Edge.");
+    return;
+  }
+
+  try {
+    statusDiv.innerText = "Connecting to DotFresh...";
+    
+    // 1. Prompt browser to connect to the Pico over USB
+    const port = await navigator.serial.requestPort();
+    await port.open({ baudRate: 115200 }); // Matches Pico's USB serial baud rate
+
+    statusDiv.innerText = "Reading system time...";
+    
+    // 2. Grab local time components from the browser
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const seconds = String(now.getSeconds()).padStart(2, '0');
+    
+    // Construct the data package matching our Pico's main.py parser
+    const cmdString = `SYNC:${year}:${month}:${day}:${hours}:${minutes}:${seconds}\n`;
+
+    statusDiv.innerText = "Flashing clock to device...";
+
+    // 3. Stream the text string straight into the USB line
+    const encoder = new TextEncoder();
+    const writer = port.writable.getWriter();
+    await writer.write(encoder.encode(cmdString));
+    
+    // Clean up connections so the port isn't locked up
+    writer.releaseLock();
+    await port.close();
+    
+    statusDiv.innerHTML = "<strong style='color: green;'>✓ Sync Complete! Your DotFresh is ready.</strong>";
+    alert("DotFresh successfully updated to your exact local time!");
+    
+  } catch (err) {
+    console.error(err);
+    statusDiv.innerHTML = "<strong style='color: red;'>× Sync Failed.</strong>";
+    alert("Could not connect. Make sure the unit is securely plugged in via USB-C.");
+  }
+});
+</script>
+
+</body>
+</html>
